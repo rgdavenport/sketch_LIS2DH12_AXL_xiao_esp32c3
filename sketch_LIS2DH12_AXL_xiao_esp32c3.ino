@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "driver/i2c.h"
-// #include <Wire.h> // Or your MCU I2C library
+#include <Wire.h> // Or your MCU I2C library
 
 // Sensor Config
 #define LIS2DH12_ADDR        0x19  // Or 0x18
@@ -39,7 +39,7 @@ void setup() {
     i2c_driver_install(I2C_MASTER_NUM, conf.mode, 0, 0, 0);
     
     // // 2. Init LIS2DJ12 MEMS Accelerometer eval module   
-    // lis2dh12_init();
+    lis2dh12_init();
     // 3. Perform one-time check
     check_sensor();
 }
@@ -86,22 +86,22 @@ void scan_bus() {
     if (devices_found == 0) Serial.println("No devices detected.");    // ... [Insert the scan_bus code from earlier] ...
 }
 
-// void lis2dh12_init() {
+void lis2dh12_init() {
 //   Wire.begin();
   
-//   // 1. Enable all axes, set 100Hz Normal Mode (ODR 0101)
-//   Wire.beginTransmission(LIS2DH12_ADDR);
-//   Wire.write(CTRL_REG1);
-//   Wire.write(0x57); // 0101 0111 (100Hz, normal, XYZ enabled)
-//   Wire.endTransmission();
+  // 1. Enable all axes, set 100Hz Normal Mode (ODR 0101)
+    // Wire.beginTransmission(LIS2DH12_ADDR);
+    // Wire.write(CTRL_REG1);
+    // Wire.write(0x57); // 0101 0111 (100Hz, normal, XYZ enabled)
+    // Wire.endTransmission();
   
-//   // 2. Set +/- 2g range, High-Resolution mode enabled
-//   Wire.beginTransmission(LIS2DH12_ADDR);
-//   Wire.write(CTRL_REG4);
-//   Wire.write(0x08); // 0000 1000
-//   Wire.endTransmission();
-//   Serial.println("LIS2DH12 Initialized");
-// }
+  // 2. Set +/- 2g range, High-Resolution mode enabled
+    // Wire.beginTransmission(LIS2DH12_ADDR);
+    // Wire.write(CTRL_REG4);
+    // Wire.write(0x08); // 0000 1000
+    // Wire.endTransmission();
+    // Serial.println("LIS2DH12 Initialized");
+}
 
 // void read_accelerometer(int16_t *x) {
 //   Wire.beginTransmission(LIS2DH12_ADDR);
