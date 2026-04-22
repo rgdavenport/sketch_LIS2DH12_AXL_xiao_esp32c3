@@ -1,0 +1,1 @@
+# sketch_LIS2DH12_AXL_xiao_esp32c3# sketch_LIS2DH12_AXL_xiao_esp32c3.ino
