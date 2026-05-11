@@ -1,17 +1,20 @@
 
 #include <Wire.h> // Or your MCU I2C library
+//#include <zephyr/kernel.h>
 
 #define LIS2DH12_ADDR    0x19 // STEVAL-MKI151v1 default I2C address
 #define CTRL_REG1        0x20
 #define CTRL_REG4        0x23
-#define STATUS_REG    0x27 // Status register address
+#define STATUS_REG       0x27 // Status register address
 #define OUT_X_L          0x28
+#define TerminalCnt      10  // max loop count
 
 int16_t data,x,y,z;
+uint16_t i;
 char dataBuffer[32];
 
 void setup() {
-    Serial.begin(115200);  //921600
+    Serial.begin(38400);  //115200
     delay(1000);  //was  while(!Serial); 
     
     // 2. Init LIS2DJ12 MEMS Accelerometer eval module   
@@ -19,11 +22,71 @@ void setup() {
 }
 
 void loop() {
-    // read and print the accelerometer outputs
-    read_accelerometer_fsm(&x, &y, &z);
-    sprintf(dataBuffer, "%d, %d, %d\n", x, y, z);
-    Serial.println(dataBuffer);
+    Serial.println("Waiting for 'START' to capture or 'EXIT' to stop...");
+
+    bool ready = false;
+    while (!ready) {
+        if (Serial.available() > 0) {
+            String command = Serial.readStringUntil('\n');
+            command.trim();
+
+            if (command.equalsIgnoreCase("START")) {
+                ready = true; // Proceed to data generation
+            } 
+            else if (command.equalsIgnoreCase("EXIT")) {
+                Serial.println("Terminating program...");
+                Serial.flush();
+                Serial.end();
+                vTaskDelete(NULL); // Kill the thread here
+            }
+        }
+    }
+
+    // --- Data Generation Section ---
+    Serial.println("START received. Generating data...");
+    for (int i = 0; i < 9; i++) {
+        read_accelerometer_fsm(&x, &y, &z);
+        sprintf(dataBuffer, "%d, %d, %d", x, y, z);
+        Serial.println(dataBuffer);
+    }
+    
+    Serial.println("--- Capture Complete ---");
+    Serial.println(); 
+    // After this, loop() restarts and waits for START again
 }
+
+
+//void loop() {
+
+//     Serial.println("Waiting for 'START' command...");
+
+//     // Wait until 'START' is received
+//     bool ready = false;
+//     while (!ready) {
+//         if (Serial.available() > 0) {
+//             String command = Serial.readStringUntil('\n');
+//             command.trim(); // The critical line to clean up the input
+
+//             if (command.equalsIgnoreCase("START")) {
+//                 ready = true;
+//             }
+//         }
+//     }
+
+//     Serial.println("START received. Generating data...");
+
+//     // read and print the accelerometer outputs
+//     for (i=0; i < 9; i++) {
+//         read_accelerometer_fsm(&x, &y, &z);
+//         sprintf(dataBuffer, "%d, %d, %d\n", x, y, z);
+//         Serial. println(dataBuffer);
+//     }
+
+//     Serial.flush();
+//     Serial.end();
+//     // Exit the thread here ..
+// }
+
 
 void lis2dh12_init() {
     Wire.begin();
@@ -45,7 +108,7 @@ void lis2dh12_init() {
 
 void read_accelerometer_fsm(int16_t *x, int16_t *y, int16_t *z) {
     uint8_t status = 0;
-
+    
     // --- Steps 1 & 2: Read STATUS_REG and poll Bit 3 (ZYXDA) ---
     // ZYXDA = 1 means new set of data is available
     do {
