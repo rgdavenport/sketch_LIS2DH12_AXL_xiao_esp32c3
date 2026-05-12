@@ -1,6 +1,5 @@
 
 #include <Wire.h> // Or your MCU I2C library
-//#include <zephyr/kernel.h>
 
 #define LIS2DH12_ADDR    0x19 // STEVAL-MKI151v1 default I2C address
 #define CTRL_REG1        0x20
@@ -44,7 +43,7 @@ void loop() {
 
     // --- Data Generation Section ---
     Serial.println("START received. Generating data...");
-    for (int i = 0; i < 9; i++) {
+    for (int i = 0; i < 10; i++) {
         read_accelerometer_fsm(&x, &y, &z);
         sprintf(dataBuffer, "%d, %d, %d", x, y, z);
         Serial.println(dataBuffer);
@@ -54,39 +53,6 @@ void loop() {
     Serial.println(); 
     // After this, loop() restarts and waits for START again
 }
-
-
-//void loop() {
-
-//     Serial.println("Waiting for 'START' command...");
-
-//     // Wait until 'START' is received
-//     bool ready = false;
-//     while (!ready) {
-//         if (Serial.available() > 0) {
-//             String command = Serial.readStringUntil('\n');
-//             command.trim(); // The critical line to clean up the input
-
-//             if (command.equalsIgnoreCase("START")) {
-//                 ready = true;
-//             }
-//         }
-//     }
-
-//     Serial.println("START received. Generating data...");
-
-//     // read and print the accelerometer outputs
-//     for (i=0; i < 9; i++) {
-//         read_accelerometer_fsm(&x, &y, &z);
-//         sprintf(dataBuffer, "%d, %d, %d\n", x, y, z);
-//         Serial. println(dataBuffer);
-//     }
-
-//     Serial.flush();
-//     Serial.end();
-//     // Exit the thread here ..
-// }
-
 
 void lis2dh12_init() {
     Wire.begin();
